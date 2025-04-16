@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, FlatList, TextInput, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getFirestore, collection, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
 import { getAuth, sendEmailVerification, signOut, onAuthStateChanged } from 'firebase/auth';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
 import { themeColors } from '../theme/theme';
 
@@ -16,6 +16,7 @@ function HomeScreen() {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [isProfileCompleted, setIsProfileCompleted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const db = getFirestore();
   const auth = getAuth();
@@ -61,6 +62,14 @@ function HomeScreen() {
     }
   };
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    const filtered = users.filter(user =>
+      user.email.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchUserData();
@@ -95,75 +104,81 @@ function HomeScreen() {
     }
   };
 
+  const services = [
+    { id: '1', title: 'Pakan Ternak', image: require('../assets/images/farm.jpg') },
+    { id: '2', title: 'Kesehatan Ayam', image: require('../assets/images/farm1.jpg') },
+    { id: '3', title: 'Manajemen Kandang', image: require('../assets/images/farm3.jpeg') }
+  ];
+
   return (
     <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: themeColors.bg }}>
       <View style={styles.profileContainer}>
         <Ionicons
           name="person-circle-outline"
-          size={80}
-          color="#6a1b9a"
+          size={70}
+          color="black"
           style={styles.profileIcon}
         />
         <View style={styles.profileInfo}>
           <Text style={styles.userName}>{userData?.name || 'Nama Pengguna'}</Text>
-          <Text style={styles.userDetails}>
-            {userData?.address || 'Alamat belum diisi'}
-          </Text>
-          <Text style={styles.userDetails}>
-            Hp: {userData?.phone || 0}
-          </Text>
+          <Text style={styles.userDetails}>Welcome</Text>
         </View>
       </View>
-      <Text style={[styles.sectionTitle, { color: 'white' }]}>Layanan</Text>
+      <View>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Cari Artikel?"
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
+        </View>
+      <View style={styles.headerContainer}>
+        <Text style={[styles.sectionTitle, { color: 'black' }]}>Layanan</Text>
+        <Text style={styles.allText}>Lainnya</Text>
+        </View>
       <View style={styles.serviceContainer}>
-        <TouchableOpacity
-          style={styles.serviceCard}
-          onPress={() => handleFeatureNavigation('DaftarBarang')}
-        >
-          <Ionicons name="leaf-outline" size={40} color="#FFFFF" />
-          <Text style={styles.serviceTitle}>Lelang</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.serviceCard}
-          onPress={() => handleFeatureNavigation('Pesan')}
-        >
-          <Ionicons name="chatbubbles-outline" size={40} color="#795548" />
-          <Text style={styles.serviceTitle}>Pesan Admin</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.serviceCard}
-          onPress={() => handleFeatureNavigation('TambahBarang')}
-        >
-          <MaterialCommunityIcons
-            name="cash"
-            size={40}
-            color="#4CAF50"
-          />
-          <Text style={styles.serviceTitle}>lelangin</Text>
-        </TouchableOpacity>
+      <FlatList
+          data={services}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.serviceCard}>
+              <Image source={item.image} style={styles.serviceImage} />
+              <Text style={styles.serviceTitle}>{item.title}</Text>
+            </View>
+          )}
+        />
+    </View>
       </View>
       <View style={styles.bottomNav}>
         <TouchableOpacity
           onPress={() => navigation.navigate('Home')}
           style={styles.navButton}
         >
-          <Ionicons name="home-outline" size={30} color="#000" />
-          <Text>Home</Text>
+          <Ionicons name="home-outline" size={30} color="#fff8e1" />
+          <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => navigation.navigate('CariBarang')}
+          onPress={() => navigation.navigate('Cam')}
           style={styles.navButton}
         >
-          <Ionicons name="search-outline" size={30} color="#000" />
-          <Text>Search</Text>
+          <Ionicons name="search-outline" size={30} color="#fff8e1" />
+          <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Search</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate('Profile')}
           style={styles.navButton}
         >
-          <Ionicons name="person-outline" size={30} color="#000" />
-          <Text>Profile</Text>
+          <Ionicons name="person-outline" size={30} color="#fff8e1"/>
+          <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Profile</Text>
         </TouchableOpacity>
+        <View style={styles.gambar}>
+      <Image
+        source={require('../assets/images/back.png')}
+        style={{ width: '100%', height: 325, resizeMode: 'cover' }}/>
+      </View>
       </View>
     </View>
   );
@@ -172,33 +187,49 @@ function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: themeColors.bg,
+    backgroundColor: '#fff8e1',
     padding: 20,
     color: 'white'
   },
+  gambar:{
+    paddingVertical: 50,
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
+  },
+  allText: {
+    fontSize: 14,
+    color: 'blue',
+    fontWeight: 'bold'
+  },  
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f1f1f1',
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
+    padding: 2,
+    marginBottom: 12,
   },
   profileIcon: {
-    marginRight: 15,
+    marginRight: 5,
   },
   profileInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: 'blue',
   },
   userDetails: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
+    fontSize: 12,
+    color: 'black',
+    marginTop: 1,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 18,
@@ -206,35 +237,47 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   serviceContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 20,
+    paddingVertical: 10,
+  },
+  serviceImage: {
+    width: 180,
+    height: 110,
+    marginBottom: 10,
+    borderRadius: 10
   },
   serviceCard: {
+    justifyContent: "center",
     alignItems: 'center',
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: themeColors.text,
-    width: '30%'
+    padding: 9,
+    width: 200,
+    height: 150, 
+    marginRight: 1, 
   },
   serviceTitle: {
     fontSize: 14,
-    marginTop: 10,
+    marginTop: 2,
     textAlign: 'center',
   },
   bottomNav: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: '#8BAA21',
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 10,
-    borderTopColor: "#ddd",
+    paddingVertical: 20,
     position: "absolute",
-    bottom: 0,
+    bottom: -10,
     left: 0,
     right: 0,
-    backgroundColor: themeColors.text,
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
+},
+  searchBar: {
+    backgroundColor: "#fff8e1",
+    height: 40,
+    borderColor:'black',
+    borderWidth: 1.5,
+    borderRadius: 5,
+    paddingLeft: 10,
+    marginBottom: 15,
   },
   navButton: {
     alignItems: 'center',

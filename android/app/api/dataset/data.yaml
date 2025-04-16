@@ -1,0 +1,20 @@
+# train: ../train/images
+# val: ../valid/images
+# test: ../test/images
+
+# nc: 3
+# names: ['DE', 'FE', 'UF']
+
+# roboflow:
+#   workspace: keith-malvado
+#   project: egg-detection-ud1ys-l0hl3
+#   version: 1
+#   license: CC BY 4.0
+#   url: https://universe.roboflow.com/keith-malvado/egg-detection-ud1ys-l0hl3/dataset/1
+
+train: ./train/images
+val: ./valid/images
+test: ./test/images
+
+nc: 3
+names: ['DE', 'FE', 'UF']

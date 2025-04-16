@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   updateRoleButtonText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 12,
   },
   bottomNav: {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, TextInput, TouchableOpacity, SafeAreaView, Alert, View } from 'react-native';
+import { Text, TextInput, TouchableOpacity, SafeAreaView, Alert, View, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { auth } from '../screen/firebase/index';
@@ -69,13 +69,19 @@ const Registrasi = () => {
           fontSize: 24,
           fontWeight: 'bold',
           color: themeColors.textSecondary,
-          marginBottom: 20,
+          marginBottom: 30,
           textAlign: 'center',
         }}
       >
         Halaman Registrasi
+        <View style={{ alignItems: 'center' }}>
+          <Image
+            source={require('../assets/images/farm1.png')}
+            style={{ width: 250, height: 250, marginBottom: 1 }}
+          />
+        </View>
       </Text>
-      <Text style={{ marginBottom: 8, color: themeColors.textSecondary }}>Email</Text>
+      <Text style={{ marginBottom: 8, color: themeColors.textSecondary, fontWeight: 'bold' }}>Email</Text>
       <TextInput
         style={{
           padding: 16,
@@ -89,7 +95,7 @@ const Registrasi = () => {
         value={email}
         onChangeText={setEmail}
       />
-      <Text style={{ marginBottom: 8, color: themeColors.textSecondary }}>Password</Text>
+      <Text style={{ marginBottom: 8, color: themeColors.textSecondary, fontWeight: 'bold' }}>Password</Text>
       <View
         style={{
           flexDirection: 'row',
@@ -119,7 +125,7 @@ const Registrasi = () => {
           />
         </TouchableOpacity>
       </View>
-      <Text style={{ marginBottom: 8, color: themeColors.textSecondary }}>Konfirmasi Password</Text>
+      <Text style={{ marginBottom: 8, color: themeColors.textSecondary, fontWeight: 'bold' }}>Konfirmasi Password</Text>
       <View
         style={{
           flexDirection: 'row',
@@ -160,14 +166,14 @@ const Registrasi = () => {
         onPress={handleSignUp}
         disabled={loading}
       >
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: themeColors.textSecondary }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color:'white' }}>
           {loading ? 'Loading...' : 'Registrasi'}
         </Text>
       </TouchableOpacity>
-      <Text style={{ textAlign: 'center', color: themeColors.textSecondary }}>
+      <Text style={{ textAlign: 'center', color: themeColors.primary }}>
         Sudah punya akun?{' '}
         <Text
-          style={{ color: themeColors.primary, fontWeight: 'bold' }}
+          style={{ color: themeColors.textSecondary, fontWeight: 'bold' }}
           onPress={() => navigation.navigate('Login')}
         >
           Login

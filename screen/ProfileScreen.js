@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { getAuth, signOut } from 'firebase/auth';
@@ -63,7 +63,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.profileContainer}>
-        <Ionicons name="person-circle-outline" size={80} color="#6a1b9a" style={styles.profileIcon} />
+        <Ionicons name="person-circle-outline" size={80} color="#000" style={styles.profileIcon} />
         <View style={styles.profileInfo}>
           <Text style={styles.userName}>{userData?.name || 'Nama Pengguna'}</Text>
           <Text style={styles.userDetails}>
@@ -86,28 +86,41 @@ export default function ProfileScreen() {
       </TouchableOpacity>
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Log Out</Text>
-      </TouchableOpacity><View style={styles.bottomNav}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Home')}
-          style={styles.navButton}
-        >
-          <Ionicons name="home-outline" size={30} color="#000" />
-          <Text>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('LihatBarang')}
-          style={styles.navButton}
-        >
-          <Ionicons name="search-outline" size={30} color="#000" />
-          <Text>Search</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Profile')}
-          style={styles.navButton}
-        >
-          <Ionicons name="person-outline" size={30} color="#000" />
-          <Text>Profile</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
+            <View style={styles.bottomNav}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Home')}
+                style={styles.navButton}
+              >
+                <Ionicons name="home-outline" size={30} color="#fff8e1" />
+                <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Home</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('camera')}
+                style={styles.navButton}
+              >
+                <Ionicons name="camera-outline" size={30} color="#fff8e1"/>
+                <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Camera</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('CariBarang')}
+                style={styles.navButton}
+              >
+                <Ionicons name="search-outline" size={30} color="#fff8e1" />
+                <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Search</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Profile')}
+                style={styles.navButton}
+              >
+                <Ionicons name="person-outline" size={30} color="#fff8e1"/>
+                <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Profile</Text>
+              </TouchableOpacity>
+              <View style={styles.gambar}>
+            <Image
+              source={require('../assets/images/back.png')}
+              style={{ width: '100%', height: 325, resizeMode: 'cover' }}/>
+            </View>
       </View>
     </View>
   );
@@ -116,16 +129,21 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f1f1f1',
+    backgroundColor: '#fff8e1',
     padding: 20,
+  },
+  gambar:{
+    paddingVertical: 50,
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
   },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: themeColors.text,
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
+    padding: 2,
+    marginBottom: 12,
   },
   profileIcon: {
     marginRight: 15,
@@ -136,12 +154,13 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: 'blue'
   },
   userDetails: {
     fontSize: 14,
-    color: '#666',
+    color: 'black',
     marginTop: 2,
+    fontWeight: 'bold'
   },
   profileStatus: {
     marginVertical: 20,
@@ -151,7 +170,7 @@ const styles = StyleSheet.create({
     color: '#00796b',
   },
   editButton: {
-    backgroundColor: '#6a1b9a',
+    backgroundColor: '#974714',
     paddingVertical: 15,
     borderRadius: 10,
     marginBottom: 20,
@@ -164,7 +183,7 @@ const styles = StyleSheet.create({
 
   },
   logoutButton: {
-    backgroundColor: '#d32f2f',
+    backgroundColor: '#E59315',
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -175,20 +194,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   bottomNav: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: '#8BAA21',
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 10,
-    borderTopColor: "#ddd",
+    paddingVertical: 20,
     position: "absolute",
-    bottom: 0,
+    bottom: -10,
     left: 0,
     right: 0,
-    backgroundColor: themeColors.text,
-    paddingHorizontal: 30,
-    
-  },
+    paddingHorizontal: 20,
+},
   navButton: {
     alignItems: 'center',
   },
