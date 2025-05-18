@@ -39,7 +39,7 @@ const Pembayaran = ({ route }) => {
     }
 
     try {
-      const response = await fetch('https://17d2-66-96-225-185.ngrok-free.app/create-payment-intent', {
+      const response = await fetch('https://58cf-103-47-133-182.ngrok-free.app/create-payment-intent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

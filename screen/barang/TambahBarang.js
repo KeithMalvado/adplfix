@@ -1,28 +1,24 @@
-
 import React, { useState, useEffect } from 'react';
-import { Text, SafeAreaView, TouchableOpacity, TextInput, Alert, Image } from 'react-native';
+import { Text, SafeAreaView, TouchableOpacity, TextInput, Alert, Image, View, StyleSheet } from 'react-native';
 import { ref, push } from 'firebase/database';
 import { getFirestore, query, where, getDocs, collection } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { realtimeDb } from '../firebase/index';
 import { themeColors } from '../../theme/theme';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 
-export default function TambahBarang() {
-  const [namaBarang, setNamaBarang] = useState('');
+export default function TambahTelur() {
+  const [namaTelur, setNamaTelur] = useState('');
   const [deskripsi, setDeskripsi] = useState('');
-  const [hargaTertinggi, setHargaTertinggi] = useState('');
-  const [openBit, setOpenBit] = useState('');
-  const [tanggalLelang, setTanggalLelang] = useState(new Date());
-  const [jamAwalLelang, setJamAwalLelang] = useState(new Date());
-  const [jamTutupLelang, setJamTutupLelang] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePickerAwal, setShowTimePickerAwal] = useState(false);
-  const [showTimePickerTutup, setShowTimePickerTutup] = useState(false);
+  const [hargaPerKg, setHargaPerKg] = useState('');
+  const [stok, setStok] = useState('');
+  const [kategori, setKategori] = useState('');
   const [userData, setUserData] = useState(null);
 
   const auth = getAuth();
   const db = getFirestore();
+  const navigation = useNavigation();
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -39,52 +35,29 @@ export default function TambahBarang() {
     }
   }, [auth, db]);
 
-  const handleHargaTertinggiChange = (text) => {
+  const handleHargaPerKgChange = (text) => {
     const numericValue = text.replace(/[^0-9]/g, '');
-    setHargaTertinggi(numericValue);
+    setHargaPerKg(numericValue);
   };
 
-  const handleOpenBitChange = (text) => {
+  const handleStokChange = (text) => {
     const numericValue = text.replace(/[^0-9]/g, '');
-    setOpenBit(numericValue);
+    setStok(numericValue);
   };
 
-  const handleDateChange = (event, date) => {
-    setShowDatePicker(false);
-    if (date) setTanggalLelang(date);
-  };
-
-  const handleTimeAwalChange = (event, date) => {
-    setShowTimePickerAwal(false);
-    if (date) setJamAwalLelang(date);
-  };
-
-  const handleTimeTutupChange = (event, date) => {
-    setShowTimePickerTutup(false);
-    if (date) setJamTutupLelang(date);
-  };
-
-  const handleAddBarang = async () => {
-    if (namaBarang && deskripsi && hargaTertinggi && openBit && tanggalLelang && jamAwalLelang && jamTutupLelang) {
-      if (isNaN(parseInt(hargaTertinggi)) || isNaN(parseInt(openBit))) {
-        Alert.alert('Warning', 'Max Bid dan Open Bid harus berupa angka.');
+  const handleAddTelur = async () => {
+    if (namaTelur && deskripsi && hargaPerKg && stok && kategori) {
+      if (isNaN(parseInt(hargaPerKg)) || isNaN(parseInt(stok))) {
+        Alert.alert('Warning', 'Harga dan stok harus berupa angka.');
         return;
       }
 
-      if (parseInt(openBit) >= parseInt(hargaTertinggi)) {
-        Alert.alert('Warning', 'Open Bid harus lebih kecil dari Max Bid.');
-        return;
-      }
-
-      const barangData = {
-        namaBarang,
+      const telurData = {
+        namaTelur,
         deskripsi,
-        hargaTertinggi: parseInt(hargaTertinggi),
-        openBit: parseInt(openBit),
-        hargaSaatIni: parseInt(openBit),
-        tanggalLelang: tanggalLelang.getTime(),
-        jamAwalLelang: jamAwalLelang.getTime(),
-        jamTutupLelang: jamTutupLelang.getTime(),
+        hargaPerKg: parseInt(hargaPerKg),
+        stok: parseInt(stok),
+        kategori,
         userId: auth.currentUser.uid,
         createdAt: Date.now(),
         user: {
@@ -94,27 +67,25 @@ export default function TambahBarang() {
           name: userData?.name || '',
           phone: userData?.phone || '',
           username: userData?.name || '',
-          userId: auth.currentUser.uid, 
+          userId: auth.currentUser.uid,
         },
         statusValidasi: 'menunggu',
       };
 
       try {
-        const barangRef = ref(realtimeDb, 'barang');
-        const newBarangRef = push(barangRef, barangData);
-        const newBarangId = newBarangRef.key;
+        const telurRef = ref(realtimeDb, 'produk');
+        const newTelurRef = push(telurRef, telurData);
+        const newTelurId = newTelurRef.key;
 
-        Alert.alert('Success', `Barang berhasil ditambahkan dengan ID: ${newBarangId}`);
-        setNamaBarang('');
+        Alert.alert('Success', `Telur berhasil ditambahkan dengan ID: ${newTelurId}`);
+        setNamaTelur('');
         setDeskripsi('');
-        setHargaTertinggi('');
-        setOpenBit('');
-        setTanggalLelang(new Date());
-        setJamAwalLelang(new Date());
-        setJamTutupLelang(new Date());
+        setHargaPerKg('');
+        setStok('');
+        setKategori('');
       } catch (error) {
-        console.error('Error adding barang:', error);
-        Alert.alert('Error', 'Terjadi kesalahan saat menambahkan barang. Coba lagi nanti.');
+        console.error('Error adding telur:', error);
+        Alert.alert('Error', 'Terjadi kesalahan saat menambahkan telur. Coba lagi nanti.');
       }
     } else {
       Alert.alert('Warning', 'Mohon lengkapi semua kolom!');
@@ -122,99 +93,87 @@ export default function TambahBarang() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.bg, justifyContent: 'center', paddingHorizontal: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', color: themeColors.text, marginBottom: 20, textAlign: 'center' }}>
-        Tambah Barang
-      </Text>
-      <Image
-        source={require('../../assets/images/welcome.png')}
-        style={{ width: 300, height: 300, alignSelf: 'center', marginBottom: 20 }}
-      />
-      <TextInput
-        style={{
-          padding: 16,
-          backgroundColor: themeColors.secondary,
-          color: themeColors.textSecondary,
-          borderRadius: 16,
-          marginBottom: 12,
-        }}
-        placeholder="Nama Barang"
-        value={namaBarang}
-        onChangeText={setNamaBarang}
-      />
-      <TextInput
-        style={{
-          padding: 16,
-          backgroundColor: themeColors.secondary,
-          color: themeColors.textSecondary,
-          borderRadius: 16,
-          marginBottom: 12,
-        }}
-        placeholder="Deskripsi"
-        value={deskripsi}
-        onChangeText={setDeskripsi}
-      />
-      <TextInput
-        style={{
-          padding: 16,
-          backgroundColor: themeColors.secondary,
-          color: themeColors.textSecondary,
-          borderRadius: 16,
-          marginBottom: 12,
-        }}
-        placeholder="Max Bid"
-        keyboardType="numeric"
-        value={hargaTertinggi}
-        onChangeText={handleHargaTertinggiChange}
-      />
-      <TextInput
-        style={{
-          padding: 16,
-          backgroundColor: themeColors.secondary,
-          color: themeColors.textSecondary,
-          borderRadius: 16,
-          marginBottom: 12,
-        }}
-        placeholder="Harga Start"
-        keyboardType="numeric"
-        value={openBit}
-        onChangeText={handleOpenBitChange}
-      />
-      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-        <Text style={{ color: themeColors.text, marginBottom: 12 }}>
-          Pilih Tanggal Lelang: {tanggalLelang.toDateString()}
+    <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.bg }}>
+        <View style={{ flex: 1, justifyContent: 'flex-start', paddingHorizontal: 20, marginTop: 55 }}>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'black', marginBottom: 20, textAlign: 'center' }}>
+          Tambah Telur
         </Text>
-      </TouchableOpacity>
-      {showDatePicker && (
-        <DateTimePicker value={tanggalLelang} mode="date" display="default" onChange={handleDateChange} />
-      )}
-      <TouchableOpacity onPress={() => setShowTimePickerAwal(true)}>
-        <Text style={{ color: themeColors.text, marginBottom: 12 }}>
-          Pilih Jam Awal Lelang: {jamAwalLelang.toLocaleTimeString()}
-        </Text>
-      </TouchableOpacity>
-      {showTimePickerAwal && (
-        <DateTimePicker value={jamAwalLelang} mode="time" display="default" onChange={handleTimeAwalChange} />
-      )}
-      <TouchableOpacity onPress={() => setShowTimePickerTutup(true)}>
-        <Text style={{ color: themeColors.text, marginBottom: 20 }}>
-          Pilih Jam Tutup Lelang: {jamTutupLelang.toLocaleTimeString()}
-        </Text>
-      </TouchableOpacity>
-      {showTimePickerTutup && (
-        <DateTimePicker value={jamTutupLelang} mode="time" display="default" onChange={handleTimeTutupChange} />
-      )}
-      <TouchableOpacity
-        style={{
-          paddingVertical: 16,
-          backgroundColor: themeColors.button,
-          borderRadius: 16,
-          alignItems: 'center',
-        }}
-        onPress={handleAddBarang}
-      >
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: themeColors.textSecondary }}>Tambah Barang</Text>
-      </TouchableOpacity>
+        <TextInput style={styles.input} placeholder="Nama Telur" value={namaTelur} onChangeText={setNamaTelur} />
+        <TextInput style={styles.input} placeholder="Deskripsi" value={deskripsi} onChangeText={setDeskripsi} />
+        <TextInput style={styles.input} placeholder="Harga Per Kg" keyboardType="numeric" value={hargaPerKg} onChangeText={handleHargaPerKgChange} />
+        <TextInput style={styles.input} placeholder="Stok" keyboardType="numeric" value={stok} onChangeText={handleStokChange} />
+        <TextInput style={styles.input} placeholder="Kategori (contoh: Ayam Kampung, Ayam Negeri)" value={kategori} onChangeText={setKategori} />
+        <TouchableOpacity style={styles.button} onPress={handleAddTelur}>
+          <Text style={styles.buttonText}>Tambah Telur</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.bottomNav}>
+        <TouchableOpacity onPress={() => navigation.navigate("HCpetugas")} style={styles.navButton}>
+          <Ionicons name="home-outline" size={30} color="#fff8e1" />
+          <Text style={styles.navText}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Cam")} style={styles.navButton}>
+          <Ionicons name="camera-outline" size={30} color="#fff8e1" />
+          <Text style={styles.navText}>Camera</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('TambahBarang')} style={styles.navButton}>
+          <Ionicons name="cube-outline" size={30} color="#fff8e1" />
+          <Text style={styles.navText}>Telur</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("ProfilPetugas")} style={styles.navButton}>
+          <Ionicons name="person-outline" size={30} color="#fff8e1" />
+          <Text style={styles.navText}>Profil</Text>
+        </TouchableOpacity>
+        <View style={styles.gambar}>
+          <Image source={require('../../assets/images/back.png')} style={{ width: '100%', height: 325, resizeMode: 'cover' }} />
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  input: {
+    padding: 16,
+    backgroundColor: themeColors.secondary,
+    color: themeColors.textSecondary,
+    borderRadius: 16,
+    marginBottom: 12,
+  },
+  button: {
+    paddingVertical: 16,
+    backgroundColor: themeColors.button,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  bottomNav: {
+    backgroundColor: '#8BAA21',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 20,
+    position: 'absolute',
+    bottom: -10,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+  },
+  navButton: {
+    alignItems: 'center',
+  },
+  navText: {
+    color: '#fff8e1',
+    fontWeight: 'bold',
+  },
+  gambar: {
+    paddingVertical: 50,
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
+  },
+});

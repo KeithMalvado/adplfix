@@ -1,66 +1,37 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { themeColors } from "../../theme/theme";
-import * as ImagePicker from 'expo-image-picker';
-import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage, addArtikel } from "../../screen/firebase/index"; // pastikan fungsi addArtikel ada di index.js
-import { v4 as uuidv4 } from 'uuid';
-import 'react-native-get-random-values';
+import { addArtikel } from "../../screen/firebase/index"; 
 
 export default function TambahArtikel() {
   const navigation = useNavigation();
   const [judul, setJudul] = useState("");
   const [isi, setIsi] = useState("");
-  const [gambar, setGambar] = useState(null);
-  const [uploading, setUploading] = useState(false);
-
-  const pilihGambar = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setGambar(result.assets[0].uri);
-    }
-  };
+  const [gambarUrl, setGambarUrl] = useState("");
 
   const handleSimpan = async () => {
-    if (!judul || !isi || !gambar) {
-      Alert.alert("Peringatan", "Harap isi semua kolom dan pilih gambar.");
+    if (!judul || !isi || !gambarUrl) {
+      Alert.alert("Peringatan", "Harap isi semua kolom dan pilih URL gambar.");
       return;
     }
 
-    setUploading(true);
-
     try {
-      const response = await fetch(gambar);
-      const blob = await response.blob();
-      const filename = `artikel/${uuidv4()}.jpg`;
-      const imageRef = storageRef(storage, filename);
-      await uploadBytes(imageRef, blob);
-      const urlGambar = await getDownloadURL(imageRef);
-
       await addArtikel({
         judul,
         isi,
-        gambar: urlGambar,
+        gambar: gambarUrl, 
         createdAt: new Date().toISOString()
       });
 
       Alert.alert("Sukses", "Artikel berhasil disimpan!");
       setJudul("");
       setIsi("");
-      setGambar(null);
+      setGambarUrl("");
     } catch (err) {
-      console.error("Gagal upload:", err);
       Alert.alert("Error", "Gagal menyimpan artikel.");
     }
-
-    setUploading(false);
   };
 
   return (
@@ -82,23 +53,24 @@ export default function TambahArtikel() {
         onChangeText={setIsi}
       />
 
-      <TouchableOpacity style={styles.button} onPress={pilihGambar}>
-        <Text style={styles.buttonText}>Pilih Gambar</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Masukkan URL gambar"
+        value={gambarUrl}
+        onChangeText={setGambarUrl}
+      />
+
+      {gambarUrl ? (
+        <Text style={{ marginVertical: 10, color: 'green', fontWeight: 'bold' }}>
+          Gambar URL telah dipilih
+        </Text>
+      ) : null}
+
+      <TouchableOpacity style={styles.button} onPress={handleSimpan}>
+        <Text style={styles.buttonText}>Simpan Artikel</Text>
       </TouchableOpacity>
-
-      {gambar && (
-        <Image
-          source={{ uri: gambar }}
-          style={{ width: "100%", height: 200, marginVertical: 10, borderRadius: 10 }}
-        />
-      )}
-
-      <TouchableOpacity style={styles.button} onPress={handleSimpan} disabled={uploading}>
-        <Text style={styles.buttonText}>{uploading ? "Menyimpan..." : "Simpan Artikel"}</Text>
-      </TouchableOpacity>
-
       <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.navButton}>
+        <TouchableOpacity onPress={() => navigation.navigate("HCpetugas")} style={styles.navButton}>
           <Ionicons name="home-outline" size={30} color="#fff8e1" />
           <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
@@ -106,17 +78,19 @@ export default function TambahArtikel() {
           <Ionicons name="camera-outline" size={30} color="#fff8e1" />
           <Text style={styles.navText}>Camera</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('TambahBarang')} style={styles.navButton}>
+          <Ionicons name="cube-outline" size={30} color="#fff8e1" />
+          <Text style={{ color: '#fff8e1', fontWeight: 'bold' }}>Telur</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("ProfilPetugas")} style={styles.navButton}>
           <Ionicons name="person-outline" size={30} color="#fff8e1" />
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
-      </View>
-
-      <View style={styles.gambar}>
+          <View style={styles.gambar}>
         <Image
-          source={require("../../assets/images/back.png")}
-          style={{ width: "100%", height: 325, resizeMode: "cover" }}
-        />
+          source={require('../../assets/images/back.png')}
+          style={{ width: '100%', height: 325, resizeMode: 'cover' }}/>
+        </View>
       </View>
     </View>
   );
@@ -128,6 +102,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontWeight: "bold",
     color: "#000",
+  },
+  gambar:{
+    paddingVertical: 50,
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
   },
   input: {
     backgroundColor: "#fff",
@@ -166,12 +147,5 @@ const styles = StyleSheet.create({
   navText: {
     color: "#fff8e1",
     fontWeight: "bold",
-  },
-  gambar: {
-    paddingVertical: 50,
-    position: "absolute",
-    bottom: 30,
-    left: 0,
-    right: 0,
   },
 });

@@ -1,264 +1,204 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert, StyleSheet } from "react-native";
-import { ref, onValue } from "firebase/database";
-import { getAuth } from "firebase/auth";
-import { realtimeDb } from "../../screen/firebase/index";
-import { themeColors } from "../../theme/theme";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import React, { useEffect, useState } from 'react';
+import { Text, SafeAreaView, TouchableOpacity, TextInput, Alert, FlatList, View, Image } from 'react-native';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, query, where, getDocs, collection } from 'firebase/firestore';
+import { ref, push, onValue, update } from 'firebase/database';
+import { realtimeDb } from '../firebase';
+import { themeColors } from '../../theme/theme';
 
-const normalizeString = (str) => str?.trim()?.toLowerCase();
+export default function BeliTelur() {
+  const [dataTelur, setDataTelur] = useState([]);
+  const [selectedTelur, setSelectedTelur] = useState(null);
+  const [jumlahKg, setJumlahKg] = useState('');
+  const [alamatPengiriman, setAlamatPengiriman] = useState('');
+  const [catatan, setCatatan] = useState('');
+  const [userData, setUserData] = useState(null);
 
-const DaftarLelang = ({ navigation }) => {
-  const [barangList, setBarangList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState(null);
+  const auth = getAuth();
+  const db = getFirestore();
 
   useEffect(() => {
-    const auth = getAuth();
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      setUserId(currentUser.uid);
+    const user = auth.currentUser;
+    if (user) {
+      const fetchUserData = async () => {
+        const q = query(collection(db, 'users'), where('email', '==', user.email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          setUserData(querySnapshot.docs[0].data());
+        }
+      };
+      fetchUserData();
     }
 
-    const barangRef = ref(realtimeDb, "barang");
-    const unsubscribe = onValue(barangRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const barangArray = Object.keys(data).map((key) => ({
-          id: key,
-          ...data[key],
+    const telurRef = ref(realtimeDb, 'produk');
+    onValue(telurRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const list = Object.entries(data).map(([id, value]) => ({
+          id,
+          ...value
         }));
-
-        const filteredBarang = barangArray.filter(item => item.statusValidasi === "disetujui");
-
-        filteredBarang.sort((a, b) => (a.status === "selesai" ? 1 : -1));
-
-        setBarangList(filteredBarang);
-      } else {
-        setBarangList([]);
+        setDataTelur(list);
       }
-      setLoading(false);
     });
-
-    return () => unsubscribe();
   }, []);
 
-  const handleBid = (item) => {
-    if (item.user.userId === userId) {
-      Alert.alert("Anda tidak bisa ikut lelang barang Anda sendiri.");
+  const handleJumlahKgChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, '');
+    setJumlahKg(numericValue);
+  };
+
+  const handleBeli = async () => {
+    if (!selectedTelur || !jumlahKg || !alamatPengiriman) {
+      Alert.alert('Warning', 'Harap isi semua data!');
       return;
     }
-  
-    if (item.status === "selesai") {
-      if (normalizeString(item.winner) === normalizeString(userId)) {
-        navigation.navigate("Pembayaran", {
-          barangId: item.id,
-          nominal: item.hargaSaatIni,
-        });
-      } else {
-        Alert.alert("Lelang Ditutup", "Anda bukan pemenang lelang ini.");
-      }
-    } else {
-      navigation.navigate("ikutlelang", { barangId: item.id });
+
+    const kg = parseInt(jumlahKg);
+    if (isNaN(kg)) {
+      Alert.alert('Error', 'Jumlah harus angka!');
+      return;
+    }
+
+    if (kg > selectedTelur.stok) {
+      Alert.alert('Error', 'Stok tidak mencukupi!');
+      return;
+    }
+
+    const pembelianData = {
+      telurId: selectedTelur.id,
+      namaTelur: selectedTelur.namaTelur,
+      jumlahKg: kg,
+      alamatPengiriman,
+      catatan,
+      userId: auth.currentUser.uid,
+      createdAt: Date.now(),
+      user: {
+        address: userData?.address || '',
+        email: userData?.email || '',
+        name: userData?.name || '',
+        phone: userData?.phone || '',
+        userId: auth.currentUser.uid
+      },
+      statusPesanan: 'menunggu_konfirmasi'
+    };
+
+    try {
+      const pembelianRef = ref(realtimeDb, 'pembelian_telur');
+      const newPembelianRef = push(pembelianRef, pembelianData);
+
+      const newStok = selectedTelur.stok - kg;
+      const telurUpdateRef = ref(realtimeDb, `produk/${selectedTelur.id}`);
+      await update(telurUpdateRef, { stok: newStok });
+
+      Alert.alert('Berhasil', 'Pesanan berhasil dibuat!');
+      setSelectedTelur(null);
+      setJumlahKg('');
+      setAlamatPengiriman('');
+      setCatatan('');
+    } catch (error) {
+      console.error('Error saat membeli:', error);
+      Alert.alert('Error', 'Terjadi kesalahan saat membeli.');
     }
   };
-  
 
-  if (loading) {
-    return <ActivityIndicator size="large" color={themeColors.button} />;
-  }
-
-  if (barangList.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.emptyText}>Tidak ada barang yang divalidasi untuk dilelang</Text>
-      </SafeAreaView>
-    );
-  }
+  const renderTelurItem = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => setSelectedTelur(item)}
+      style={{
+        padding: 16,
+        backgroundColor: selectedTelur?.id === item.id ? themeColors.button : themeColors.secondary,
+        marginBottom: 10,
+        borderRadius: 12,
+      }}
+    >
+      <Text style={{ fontWeight: 'bold', fontSize: 16, color: themeColors.textSecondary }}>
+        {item.namaTelur} - {item.kategori}
+      </Text>
+      <Text style={{ color: themeColors.textSecondary }}>
+        Harga: Rp {item.hargaPerKg}/kg | Stok: {item.stok} kg
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Daftar Barang Lelang</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.bg, padding: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', color: themeColors.text, marginBottom: 10 }}>
+        Beli Telur
+      </Text>
 
-      <FlatList
-        data={barangList}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>{item.namaBarang}</Text>
-            <Text style={styles.cardText}>
-              Harga Saat Ini: {item.hargaSaatIni}
-            </Text>
-            <Text style={styles.cardText}>
-              Harga Maksimum: {item.hargaTertinggi}
-            </Text>
-            <Text style={styles.cardText}>
-              Status:{" "}
-              {item.status === "selesai"
-                ? "Lelang Selesai"
-                : "Lelang Berlangsung"}
-            </Text>
-            <Text style={styles.cardText}>
-              Pemenang:{" "}
-              {item.status === "selesai"
-                ? item.winner || "Belum Ada"
-                : "Belum Ada"}
-            </Text>
-            <TouchableOpacity
-              onPress={() => handleBid(item)}
-              style={[
-                styles.button,
-                {
-                  backgroundColor:
-                    item.status === "selesai"
-                      ? normalizeString(item.winner) === normalizeString(userId)
-                        ? themeColors.button
-                        : "gray"
-                      : themeColors.button,
-                },
-              ]}
-              disabled={
-                item.status === "selesai" &&
-                normalizeString(item.winner) !== normalizeString(userId)
-              }
-            >
-              <Text style={styles.buttonText}>
-                {item.status === "selesai"
-                  ? normalizeString(item.winner) === normalizeString(userId)
-                    ? "Pembayaran"
-                    : "Lelang Selesai"
-                  : "ikut Lelang"}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("RiwayatLelang", { barangId: item.id })
-              }
-              style={[
-                styles.button,
-                { backgroundColor: themeColors.button, marginTop: 10 },
-              ]}
-            >
-              <Text style={styles.buttonText}>Riwayat Lelang</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+      <Image
+        source={require('../../assets/images/welcome.png')}
+        style={{ width: 250, height: 250, alignSelf: 'center', marginBottom: 10 }}
       />
 
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Home")}
-          style={styles.navButton}
-        >
-          <Ionicons name="home-outline" size={30} color="#000" />
-          <Text>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("CariBarang")}
-          style={styles.navButton}
-        >
-          <Ionicons name="search-outline" size={30} color="#000" />
-          <Text>Search</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Profile")}
-          style={styles.navButton}
-        >
-          <Ionicons name="person-outline" size={30} color="#000" />
-          <Text>Profile</Text>
-        </TouchableOpacity>
-      </View>
+      <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10, color: themeColors.text }}>
+        Pilih Telur:
+      </Text>
+
+      <FlatList
+        data={dataTelur}
+        renderItem={renderTelurItem}
+        keyExtractor={(item) => item.id}
+        style={{ marginBottom: 16 }}
+      />
+
+      {selectedTelur && (
+        <>
+          <Text style={{ fontSize: 16, marginBottom: 5, color: themeColors.text }}>
+            Anda memilih: <Text style={{ fontWeight: 'bold' }}>{selectedTelur.namaTelur}</Text>
+          </Text>
+
+          <TextInput
+            style={{
+              padding: 16,
+              backgroundColor: themeColors.secondary,
+              borderRadius: 12,
+              marginBottom: 12,
+              color: themeColors.textSecondary,
+            }}
+            placeholder="Jumlah (kg)"
+            keyboardType="numeric"
+            value={jumlahKg}
+            onChangeText={handleJumlahKgChange}
+          />
+          <TextInput
+            style={{
+              padding: 16,
+              backgroundColor: themeColors.secondary,
+              borderRadius: 12,
+              marginBottom: 12,
+              color: themeColors.textSecondary,
+            }}
+            placeholder="Alamat Pengiriman"
+            value={alamatPengiriman}
+            onChangeText={setAlamatPengiriman}
+          />
+          <TextInput
+            style={{
+              padding: 16,
+              backgroundColor: themeColors.secondary,
+              borderRadius: 12,
+              marginBottom: 12,
+              color: themeColors.textSecondary,
+            }}
+            placeholder="Catatan (opsional)"
+            value={catatan}
+            onChangeText={setCatatan}
+          />
+          <TouchableOpacity
+            style={{
+              backgroundColor: themeColors.button,
+              padding: 16,
+              borderRadius: 12,
+              alignItems: 'center',
+            }}
+            onPress={handleBeli}
+          >
+            <Text style={{ color: themeColors.textSecondary, fontWeight: 'bold' }}>Beli Sekarang</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </SafeAreaView>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: themeColors.bg,
-    paddingHorizontal: 0,
-    paddingTop: 70,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: themeColors.text,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  emptyText: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: themeColors.text,
-    marginTop: 20,
-  },
-  card: {
-    padding: 20,
-    backgroundColor: themeColors.secondary,
-    borderRadius: 20,
-    marginBottom: 16,
-    marginHorizontal: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    width: '90%',
-    alignSelf: 'center'
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: themeColors.textSecondary,
-    marginBottom: 8,
-  },
-  cardText: {
-    fontSize: 14,
-    color: themeColors.textSecondary,
-    marginBottom: 4,
-  },
-  button: {
-    marginTop: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: themeColors.button,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: themeColors.text,
-  },
-  bottomNav: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 10,
-    borderTopColor: "#ddd",
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: themeColors.text,
-    paddingHorizontal: 30,
-  },
-  navButton: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
-  },
-  navText: {
-    fontSize: 12,
-    color: "#000",
-  },
-});
-
-
-export default DaftarLelang;
+}

@@ -126,7 +126,7 @@ export default function LoginScreen() {
             flex: 1,
             backgroundColor: '#fff8e1',
             paddingHorizontal: 30,
-            paddingTop: 30,
+            paddingTop: 8,
             borderTopLeftRadius: 50,
             borderTopRightRadius: 50,
             shadowColor: '#000',
@@ -135,7 +135,7 @@ export default function LoginScreen() {
             shadowRadius: 5,
           }}
         >
-          <View style={{ marginBottom: 20 }}>
+          <View style={{ marginBottom: 10 }}>
           <Text style={{ color: '#a0522d', marginLeft: 10, fontWeight: 'bold' }}>Alamat Email</Text>
           <TextInput
               style={{
@@ -205,7 +205,7 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 30 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 1 }}>
             <Text style={{ color: '#6c8c43', borderRadius: 25 }}>Belum Memiliki Akun? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
               <Text style={{ color: '#a0522d', fontWeight: 'bold' }}>Daftar</Text>

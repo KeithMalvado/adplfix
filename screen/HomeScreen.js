@@ -64,10 +64,10 @@ function HomeScreen() {
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    const filtered = users.filter(user =>
-      user.email.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredUsers(filtered);
+  };
+
+  const handleFocus = () => {
+    navigation.navigate('CariBara ng', { searchQuery });
   };
 
   useFocusEffect(
@@ -131,11 +131,8 @@ function HomeScreen() {
           placeholder="Cari Artikel?"
           value={searchQuery}
           onChangeText={handleSearch}
+          onFocus={handleFocus}  
         />
-        </View>
-      <View style={styles.headerContainer}>
-        <Text style={[styles.sectionTitle, { color: 'black' }]}>Layanan</Text>
-        <Text style={styles.allText}>Lainnya</Text>
         </View>
       <View style={styles.serviceContainer}>
       <FlatList
@@ -161,11 +158,18 @@ function HomeScreen() {
           <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => navigation.navigate('Cam')}
+          onPress={() => navigation.navigate('DaftarBarang')}
           style={styles.navButton}
         >
           <Ionicons name="search-outline" size={30} color="#fff8e1" />
-          <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Search</Text>
+          <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Belanja</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Artikel')}
+          style={styles.navButton}
+        >
+          <Ionicons name="book-outline" size={30} color="#fff8e1"/>
+          <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Artikel</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate('Profile')}
@@ -175,10 +179,10 @@ function HomeScreen() {
           <Text style={{ color: '#fff8e1', fontWeight:'bold' }}>Profile</Text>
         </TouchableOpacity>
         <View style={styles.gambar}>
-      <Image
-        source={require('../assets/images/back.png')}
-        style={{ width: '100%', height: 325, resizeMode: 'cover' }}/>
-      </View>
+        <Image
+          source={require('../assets/images/back.png')}
+          style={{ width: '100%', height: 325, resizeMode: 'cover' }}/>
+        </View>
       </View>
     </View>
   );

@@ -12,17 +12,16 @@ import EditUser from "./screen/user/EditUser";
 import Pembayaran from "./screen/Lelang/Pembayaran";
 import ScreenDataUser from "./screen/user/data/ScreenDataUser";
 import DaftarBarang from "./screen/Lelang/DaftarLelang";
-import DetailLelang from "./screen/Lelang/DetailBarang";
-import IkutLelang from "./screen/Lelang/ikutlelang";
 import ProfileScreen from "./screen/ProfileScreen";
-import RiwayatLelang from "./screen/Lelang/RiwayatLelang";
 import { StripeProvider } from '@stripe/stripe-react-native';
 import CariAdmin from "./screen/user/admin/SearchAdmin";
-import CariBarang from "./screen/Lelang/CariBarang";
+import Artikel from "./screen/Lelang/artikel";
 import Pesan from "./screen/Lelang/Pesan";
 import AdminScreen from "./screen/user/admin/inputrekomen";
-import Cam from "./screen/cam";
+import Cam from "./screen/Petugas/cam";
+import DetailArtikel from "./screen/Lelang/DetailArtikel";
 import ProfilPetugas from "./screen/Petugas/ProfilPetugas";
+import Riwayat from "./screen/Petugas/riwayattelur";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -51,11 +50,9 @@ export default function App() {
         >
           <Stack.Screen name="Pesan"component={Pesan}/>
           <Stack.Screen name="ProfilPetugas"component={ProfilPetugas}/>
-          <Stack.Screen name="CariBarang" component={CariBarang}/>
+          <Stack.Screen name="Artikel" component={Artikel}/>
           <Stack.Screen name="CariRole" component={CariAdmin}/>
           <Stack.Screen name="Pembayaran" component={Pembayaran} />
-          <Stack.Screen name="RiwayatLelang" component={RiwayatLelang} />
-          <Stack.Screen name="DetailBarang" component={DetailLelang} />
           <Stack.Screen name="DaftarBarang" component={DaftarBarang} />
           <Stack.Screen name="HomeAdmin" component={HomeAdmin} />
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
@@ -64,7 +61,9 @@ export default function App() {
           <Stack.Screen name="DataUser" component={ScreenDataUser} />
           <Stack.Screen name="HCpetugas" component={HomescreenPetugas}/>
           <Stack.Screen name="Admin" component={AdminScreen} />
-          <Stack.Screen name="Cam" component={Cam} />
+          <Stack.Screen name="Cam" component={Cam} options={{ title: 'Deteksi Telur' }} />
+          <Stack.Screen name="Riwayat" component={Riwayat} options={{ title: 'Riwayat Deteksi' }} />
+          <Stack.Screen name="DetailArtikel" component={DetailArtikel} />
           <Stack.Screen name="Home">
             {(props) => <HomeScreen {...props} />}
           </Stack.Screen>
@@ -84,8 +83,6 @@ export default function App() {
           <Stack.Screen name="DataDiri">
             {(props) => <ScreenDataUser {...props} />}
           </Stack.Screen>
-          <Stack.Screen name="ikutlelang" component={IkutLelang} />
-          <Stack.Screen name="DetailLelang" component={DetailLelang} />
         </Stack.Navigator>
       </NavigationContainer>
     </StripeProvider>

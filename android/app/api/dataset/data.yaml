@@ -1,20 +1,15 @@
-# train: ../train/images
-# val: ../valid/images
-# test: ../test/images
+# Path ke folder gambar dan label
+train: C:/Users/Keith/OneDrive/Documents/ADPLPPL/LelanginDone/android/app/api/dataset/train/images
+val: C:/Users/Keith/OneDrive/Documents/ADPLPPL/LelanginDone/android/app/api/dataset/valid/images
+test: C:/Users/Keith/OneDrive/Documents/ADPLPPL/LelanginDone/android/app/api/dataset/test/images
+# Jumlah kelas dan nama kelas
+nc: 3                   # Jumlah kelas
+names: ['DE', 'FE', 'UF']  # Daftar nama kelas, pastikan urutan dan nama sesuai dengan label
 
-# nc: 3
-# names: ['DE', 'FE', 'UF']
-
-# roboflow:
-#   workspace: keith-malvado
-#   project: egg-detection-ud1ys-l0hl3
-#   version: 1
-#   license: CC BY 4.0
-#   url: https://universe.roboflow.com/keith-malvado/egg-detection-ud1ys-l0hl3/dataset/1
-
-train: ./train/images
-val: ./valid/images
-test: ./test/images
-
-nc: 3
-names: ['DE', 'FE', 'UF']
+# (Opsional) Informasi tambahan untuk dataset Roboflow
+roboflow:
+  workspace: keith-malvado  # Nama workspace Roboflow
+  project: egg-detection-ud1ys-l0hl3  # Nama proyek di Roboflow
+  version: 1  # Versi dataset
+  license: CC BY 4.0  # Lisensi dataset
+  url: https://universe.roboflow.com/keith-malvado/egg-detection-ud1ys-l0hl3/dataset/1  # URL dataset
