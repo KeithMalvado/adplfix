@@ -68,7 +68,7 @@ npm install
 
 ## Penggunaan
 
-```bash
+bash
 npm start
 npm run dev
 
