@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Lelangin",
+    "slug": "lelangin",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.keithhyper.Lelangin"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_aW5mb3JtZWQtc2VydmFsLTI1LmNsZXJrLmFjY291bnRzLmRldiQ",
+      "clerkRedirectUri": "https://informed-serval-25.clerk.accounts.dev/v1/oauth_callback",
+      "eas": {
+        "projectId": "b6b4049c-8fb6-4fc0-a559-25d2fe11cb6a"
+      },
+      "redirectUri": "https://localhost:19006"
+    },
+    "owner": "keithhyper"
+  }
+}

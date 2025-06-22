@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "2184481177",
+    "firebase_url": "https://lelangin-e4ceb-default-rtdb.firebaseio.com",
+    "project_id": "lelangin-e4ceb",
+    "storage_bucket": "lelangin-e4ceb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2184481177:android:ea590bb4188653eeecab08",
+        "android_client_info": {
+          "package_name": "com.keithhyper.lelangin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "2184481177-0v4t43e99rnp1jtetslvv8up5smno19t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keithhyper.lelangin",
+            "certificate_hash": "3c9a765171fac6f449eba864d3c80489b043c223"
+          }
+        },
+        {
+          "client_id": "2184481177-l1skvpnlraoce950ov4v9mr4h6ikrhno.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3H7pK0S11EITyX4Ko5Lfg90bKiYIOmks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2184481177-46nvardq2bpcodlpaiourke15o50clpu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
